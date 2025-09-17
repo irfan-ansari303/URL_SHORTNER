@@ -1,6 +1,6 @@
 URL Shortener 🚀
 
-A simple and efficient URL Shortener web application built with Node.js, Express, MongoDB, and optionally React for the frontend. Users can create short URLs for long links and track them easily.
+A simple and efficient URL Shortener web application built with Node.js, Express, MongoDB, and  React for the frontend. Users can create short URLs for long links and track them easily.
 
 Features
 
@@ -18,13 +18,13 @@ Easy to deploy on platforms like Vercel (frontend) and Render/Railway (backend).
 
 Tech Stack
 
-Frontend: React, Tailwind CSS (optional)
+Frontend: React, Tailwind CSS 
 
 Backend: Node.js, Express
 
 Database: MongoDB
 
-Authentication: JWT (optional)
+Authentication: JWT 
 
 Version Control: Git & GitHub
 
