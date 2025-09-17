@@ -1,7 +1,23 @@
-const express=require("express");
-const { gereratenewshorturl,handleGetAnalytics }= require("../controllers/url")
+const express = require("express");
+const router = express.Router();
+const authMiddleware=require("../middleware/authMiddleware");
 
-const router=express.Router();
-router.post("/",gereratenewshorturl);
-router.get("/analytics/:shortId",handleGetAnalytics);
-module.exports=router;
+const { generateNewShortUrl, handleGetAnalytics, handleRedirect, renderHome } = require("../controllers/url");
+
+
+router.use(authMiddleware)
+
+// Home page
+
+router.get("/",renderHome);
+
+// Generate new short URL
+router.post("/", generateNewShortUrl);
+
+// Get analytics
+router.get("/analytics/:shortId", handleGetAnalytics);
+
+// Redirect short URL
+router.get("/:shortId", handleRedirect);
+
+module.exports = router;

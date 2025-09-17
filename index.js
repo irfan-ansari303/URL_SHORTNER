@@ -1,51 +1,71 @@
-const express=require('express');
+const express = require("express");
 require("dotenv").config();
-const {connectmongoose} =require("./connect");
+const cookieParser=require("cookie-parser")
+const mongoose = require("mongoose");
+const path = require("path");
 
-const urlRoutes=require("./routes/url");
-const Url = require("./models/url");
-const staticRouter=require("./routes/staticRouter")
-const userRoute=require("./routes/user")
+const urlRoutes = require("./routes/url");
+const staticRouter = require("./routes/staticRouter");
+const userRoutes = require("./routes/user");
 
+const app = express();
 
-const path=require("path")
-const app=express();
-
-app.set('view engine','ejs');
-app.set('views',path.resolve('./views'))
-
+// middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended:false }));
+app.use(express.urlencoded({extended:false}));
+app.use(cookieParser());
 
-app.use("/",staticRouter);
-app.use("/user",userRoute)
-app.use("/url",urlRoutes);
+// Set view engine
+app.set("view engine", "ejs");
+app.set("views", path.resolve("./views"));
 
-connectmongoose(process.env.MONGO_URL,{
-     useNewUrlParser: true,
-     useUnifiedTopology: true,
-})
-.then(()=>{
-    console.log("Connectd to MongoDb");
-})
-.catch((err)=>{
-    console.log("Error connecting to MongoDb",err);
-})
-app.get('/:shortId',async(req,res)=>{
-    const shortId=req.params.shortId;
-    const entry= await Url.findOneAndUpdate({
-        shortId
-    },{$push:{
-        visitHistory:{
-            timestamp:Date.now(),
-        }
-    }})
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+
+// Set view engine
+app.set("view engine", "ejs");
+app.set("views", path.resolve("./views"));
+
+
+// Routes
+app.use("/", staticRouter);
+app.use("/user", userRoutes);
+app.use("/url", urlRoutes);
+
+// Route to handle short URLs
+const Url = require("./models/url");
+app.get("/:shortId", async (req, res) => {
+  try {
+    const shortId = req.params.shortId;
+    const entry = await Url.findOneAndUpdate(
+      { shortId },
+      { $push: { visitHistory: { timestamp: Date.now() } } }
+    );
+
     if (!entry) {
-    return res.status(404).json({ error: "Short URL not found" });
-  }
-    res.redirect(entry.redirectUrl);
+      return res.status(404).json({ error: "Short URL not found" });
+    }
 
-})
-app.listen(process.env.PORT,()=>{
-    console.log(`Server started at PORT : ${process.env.PORT}`)
+    res.redirect(entry.redirectUrl);
+  } catch (err) {
+    console.error("Error in short URL route:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
+
+// Connect to MongoDB and start server
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("✅ Connected to MongoDB");
+     
+    const PORT=process.env.PORT || 8000
+    app.listen(PORT, () => {
+      console.log(`🚀 Server started at PORT : ${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Error connecting to MongoDB:", err);
+  });

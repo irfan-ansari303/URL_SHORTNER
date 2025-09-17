@@ -1,43 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URL SHORTNER</title>
-</head>
-<body>
-<!-- first commit  -->
-    <h1>URL SHORTNER</h1>
-    <% if (id) { %> 
-        <p>URL Generated: http://localhost:8000/<%= id %></p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL SHORTENER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">URL SHORTENER</h1>
+
+    <% if (id) { %>
+      <p class="bg-green-200 text-green-800 px-4 py-2 rounded mb-4">
+        ✅ URL Generated: 
+        <a href="http://localhost:<%= process.env.PORT %>/<%= id %>" class="underline" target="_blank">
+          http://localhost:<%= process.env.PORT %>/<%= id %>
+        </a>
+      </p>
     <% } %>
-    <div>
-        <form method="POST" action="/url">
-            <input type="text" name="url" placeholder="http://example.com"/>
-            <button type="submit">Generate</button>
-        </form> 
+
+    <!-- URL Form -->
+    <div class="w-full max-w-md mb-6">
+      <form method="POST" action="/url" class="flex gap-2">
+        <input
+          type="text"
+          name="url"
+          placeholder="http://example.com"
+          required
+          class="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <button
+          type="submit"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+        >
+          Generate
+        </button>
+      </form>
     </div>
-    <div>
-        <% if(locals.urls){%>
-            <table>
-                <thead>
-                  <th>S.NO</th>
-                  <th>sortID</th>
-                  <th>redirect ID</th>
-                  <th>clicks</th>
-                </thead>
-                <tbody>
-                    <% urls.forEach((url,index) => { %>
-                        <tr>
-                            <td><%=index+1 %></td>
-                            <td><%=url.shortID%></td>
-                            <td><%=url.redirectUrl%></td>
-                            <td><%=url.visitHistory.length%></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        <%} %>
+
+    <!-- URL Table -->
+    <div class="w-full max-w-4xl overflow-x-auto">
+      <% if (urls && urls.length > 0) { %>
+        <table class="min-w-full bg-white rounded-lg shadow overflow-hidden">
+          <thead class="bg-blue-500 text-white">
+            <tr>
+              <th class="px-4 py-2 text-left">S.NO</th>
+              <th class="px-4 py-2 text-left">Short ID</th>
+              <th class="px-4 py-2 text-left">Redirect URL</th>
+              <th class="px-4 py-2 text-left">Clicks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% urls.forEach((url, index) => { %>
+              <tr class="border-b hover:bg-gray-100 transition">
+                <td class="px-4 py-2"><%= index + 1 %></td>
+                <td class="px-4 py-2">
+                  <a href="/<%= url.shortId %>" target="_blank" class="text-blue-500 underline">
+                    <%= url.shortId %>
+                  </a>
+                </td>
+                <td class="px-4 py-2 break-words"><%= url.redirectUrl %></td>
+                <td class="px-4 py-2"><%= url.visitHistory.length %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p class="text-gray-500 mt-4">No URLs generated yet.</p>
+      <% } %>
     </div>
-</body>
+  </body>
 </html>
