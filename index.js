@@ -9,6 +9,18 @@ const staticRouter = require("./routes/staticRouter");
 const userRoutes = require("./routes/user");
 
 const app = express();
+// after dotenv.config() and before routes
+const baseUrl = process.env.BASE_URL || process.env.FRONTEND_URL || null;
+
+app.use((req, res, next) => {
+  // compute a fallback base URL from request when env var is not set
+  res.locals.baseUrl = baseUrl || `${req.protocol}://${req.get("host")}`;
+  next();
+});
+
+
+
+
 
 // middleware
 app.use(express.json());

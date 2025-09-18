@@ -11,9 +11,9 @@
 
     <% if (id) { %>
       <p class="bg-green-200 text-green-800 px-4 py-2 rounded mb-4">
-        ✅ URL Generated: 
-        <a href="http://localhost:<%= process.env.PORT %>/<%= id %>" class="underline" target="_blank">
-          http://localhost:<%= process.env.PORT %>/<%= id %>
+        ✅ URL Generated:
+        <a href="<%= baseUrl %>/<%= id %>" class="underline" target="_blank" rel="noopener noreferrer">
+          <%= baseUrl %>/<%= id %>
         </a>
       </p>
     <% } %>
@@ -54,12 +54,12 @@
               <tr class="border-b hover:bg-gray-100 transition">
                 <td class="px-4 py-2"><%= index + 1 %></td>
                 <td class="px-4 py-2">
-                  <a href="/<%= url.shortId %>" target="_blank" class="text-blue-500 underline">
+                  <a href="<%= baseUrl %>/<%= url.shortId %>" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">
                     <%= url.shortId %>
                   </a>
                 </td>
                 <td class="px-4 py-2 break-words"><%= url.redirectUrl %></td>
-                <td class="px-4 py-2"><%= url.visitHistory.length %></td>
+                <td class="px-4 py-2"><%= url.visitHistory?.length || 0 %></td>
               </tr>
             <% }) %>
           </tbody>
