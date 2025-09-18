@@ -1,45 +1,38 @@
-const express = require("express");
-require("dotenv").config();
-const cookieParser=require("cookie-parser")
-const mongoose = require("mongoose");
-const path = require("path");
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const urlRoutes = require("./routes/url");
-const staticRouter = require("./routes/staticRouter");
-const userRoutes = require("./routes/user");
+import urlRoutes from "./routes/url.js";
+import staticRouter from "./routes/staticRouter.js";
+import userRoutes from "./routes/user.js";
+import Url from "./models/url.js";
+
+dotenv.config();
+
+// Fix __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-// after dotenv.config() and before routes
-const baseUrl = process.env.BASE_URL || process.env.FRONTEND_URL || null;
 
+// ✅ Set view engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+// Base URL for frontend (Render, localhost, etc.)
+const baseUrl = process.env.BASE_URL || process.env.FRONTEND_URL || null;
 app.use((req, res, next) => {
-  // compute a fallback base URL from request when env var is not set
   res.locals.baseUrl = baseUrl || `${req.protocol}://${req.get("host")}`;
   next();
 });
 
-
-
-
-
-// middleware
-app.use(express.json());
-app.use(express.urlencoded({extended:false}));
-app.use(cookieParser());
-
-// Set view engine
-app.set("view engine", "ejs");
-app.set("views", path.resolve("./views"));
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-
-// Set view engine
-app.set("view engine", "ejs");
-app.set("views", path.resolve("./views"));
-
+app.use(cookieParser());
 
 // Routes
 app.use("/", staticRouter);
@@ -47,7 +40,6 @@ app.use("/user", userRoutes);
 app.use("/url", urlRoutes);
 
 // Route to handle short URLs
-const Url = require("./models/url");
 app.get("/:shortId", async (req, res) => {
   try {
     const shortId = req.params.shortId;
@@ -72,10 +64,10 @@ mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("✅ Connected to MongoDB");
-     
-    const PORT=process.env.PORT || 8000
+
+    const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server started at PORT : ${process.env.PORT}`);
+      console.log(`🚀 Server started at PORT : ${PORT}`);
     });
   })
   .catch((err) => {
