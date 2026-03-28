@@ -1,0 +1,11 @@
+{
+  "name": "url-shortener-fullstack",
+  "version": "1.0.0",
+  "description": "Fullstack URL Shortener deployed as a single service",
+  "scripts": {
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend",
+    "start": "npm start --prefix backend"
+  },
+  "author": "",
+  "license": "ISC"
+}
