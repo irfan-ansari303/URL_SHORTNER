@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
 import urlRoutes from "./routes/url.js";
 import staticRouter from "./routes/staticRouter.js";
@@ -17,6 +18,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"], 
+  credentials: true,
+}));
+
 
 // ✅ Set view engine
 app.set("view engine", "ejs");
