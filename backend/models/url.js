@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const urlSchema = new mongoose.Schema({
   shortId: { type: String, required: true, unique: true },
@@ -8,7 +8,9 @@ const urlSchema = new mongoose.Schema({
       timestamp: { type: Number },
     },
   ],
-  owner:{type:mongoose.Schema.Types.ObjectId,ref:"user",required:true}
-},{timestamps:true});
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Url", urlSchema);
+const Url = mongoose.model("Url", urlSchema);
+export default Url;
+
