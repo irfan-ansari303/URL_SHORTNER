@@ -41,13 +41,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// ✅ Serve static files from React build
+const buildPath = path.join(__dirname, "../frontend/build");
+app.use(express.static(buildPath));
+
 // Routes
-app.use("/", staticRouter);
 app.use("/user", userRoutes);
 app.use("/url", urlRoutes);
+app.use("/", staticRouter);
 
-// Route to handle short URLs
-app.get("/:shortId", async (req, res) => {
+// Route to handle short URLs (Dynamic)
+app.get("/:shortId", async (req, res, next) => {
+  // Ignore routes starting with user or url to prevent overlaps
+  if (req.params.shortId === 'user' || req.params.shortId === 'url' || req.params.shortId === 'static') {
+    return next();
+  }
+
   try {
     const shortId = req.params.shortId;
     const entry = await Url.findOneAndUpdate(
@@ -56,15 +65,21 @@ app.get("/:shortId", async (req, res) => {
     );
 
     if (!entry) {
-      return res.status(404).json({ error: "Short URL not found" });
+      return next(); // Pass to catch-all (which serves React app)
     }
 
-    res.redirect(entry.redirectUrl);
+    return res.redirect(entry.redirectUrl);
   } catch (err) {
     console.error("Error in short URL route:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// Catch-all route to serve React app for frontend routing (must be LAST)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(buildPath, "index.html"));
+});
+
 
 // Connect to MongoDB and start server
 mongoose
