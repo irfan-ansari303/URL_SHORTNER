@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "";
 
 // Axios defaults for credentials (cookies)
 axios.defaults.withCredentials = true;
