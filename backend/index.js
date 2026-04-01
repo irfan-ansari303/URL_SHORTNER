@@ -80,7 +80,6 @@ app.get((req, res) => {
   res.sendFile(path.join(buildPath, "index.html"));
 });
 
-
 // Connect to MongoDB and start server
 mongoose
   .connect(process.env.MONGO_URL)
