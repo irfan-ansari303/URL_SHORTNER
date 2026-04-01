@@ -76,7 +76,7 @@ app.get("/:shortId", async (req, res, next) => {
 });
 
 // Catch-all route to serve React app for frontend routing (must be LAST)
-app.get("*", (req, res) => {
+app.get((req, res) => {
   res.sendFile(path.join(buildPath, "index.html"));
 });
 
