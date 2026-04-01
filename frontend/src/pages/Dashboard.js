@@ -23,7 +23,7 @@ const Dashboard = ({ url, setUrl, handleShorten, shortId, API_BASE_URL, history,
       {shortId && (
         <div className="result-card">
           <div>
-            <p style={{fontSize: "0.875rem", marginBottom: "0.5rem", color: "white"}}>Your Shortened URL:</p>
+            <p style={{fontSize: "0.875rem", marginBottom: "0.5rem", color: "black"}}>Your Shortened URL:</p>
             <div className="result-url">{API_BASE_URL}/{shortId}</div>
           </div>
           <button 

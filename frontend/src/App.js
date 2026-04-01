@@ -4,6 +4,8 @@ import * as authService from "./api/auth";
 import * as urlService from "./api/url";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
+import LandingPage from "./pages/LandingPage";
+import Navbar from "./components/Navbar";
 
 const API_BASE_URL = "";
 
@@ -17,6 +19,7 @@ function App() {
 
   const [authForm, setAuthForm] = useState({ email: "", password: "", name: "" });
   const [isSignup, setIsSignup] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     fetchHistory();
@@ -71,18 +74,47 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    // Clear cookies/token logic if any (optional based on your backend auth)
+    setIsLogged(false);
+    setShowAuth(false);
+  };
+
+  const openLogin = () => {
+    setIsSignup(false);
+    setShowAuth(true);
+    setError("");
+  };
+
+  const openSignup = () => {
+    setIsSignup(true);
+    setShowAuth(true);
+    setError("");
+  };
+
   return (
     <div className="App">
+      <Navbar 
+        isLogged={isLogged} 
+        onLogin={openLogin}
+        onSignup={openSignup}
+        onLogout={handleLogout}
+      />
+      
       {!isLogged ? (
-        <AuthPage 
-          isSignup={isSignup}
-          setIsSignup={setIsSignup}
-          authForm={authForm}
-          setAuthForm={setAuthForm}
-          handleAuth={handleAuth}
-          loading={loading}
-          error={error}
-        />
+        !showAuth ? (
+          <LandingPage onGetStarted={openSignup} />
+        ) : (
+          <AuthPage 
+            isSignup={isSignup}
+            setIsSignup={setIsSignup}
+            authForm={authForm}
+            setAuthForm={setAuthForm}
+            handleAuth={handleAuth}
+            loading={loading}
+            error={error}
+          />
+        )
       ) : (
         <Dashboard 
           url={url}

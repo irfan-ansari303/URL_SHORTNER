@@ -30,7 +30,7 @@ const AuthPage = ({ isSignup, setIsSignup, authForm, setAuthForm, handleAuth, lo
           onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
           required
         />
-        {error && <p style={{color: "#f87171", textAlign: "center", marginBottom: "1rem"}}>{error}</p>}
+        {error && <p style={{color: "black", fontWeight: "900", textAlign: "center", marginBottom: "1rem"}}>ERROR: {error}</p>}
         <button type="submit" style={{width: "100%"}} disabled={loading}>
           {loading ? "Processing..." : (isSignup ? "Sign Up" : "Sign In")}
         </button>
