@@ -95,18 +95,18 @@ function App() {
 
   return (
     <div className="App">
-      <Navbar 
-        isLogged={isLogged} 
+      <Navbar
+        isLogged={isLogged}
         onLogin={openLogin}
         onSignup={openSignup}
         onLogout={handleLogout}
       />
-      
+
       {!isLogged ? (
         !showAuth ? (
           <LandingPage onGetStarted={openSignup} />
         ) : (
-          <AuthPage 
+          <AuthPage
             isSignup={isSignup}
             setIsSignup={setIsSignup}
             authForm={authForm}
@@ -117,7 +117,7 @@ function App() {
           />
         )
       ) : (
-        <Dashboard 
+        <Dashboard
           url={url}
           setUrl={setUrl}
           handleShorten={handleShorten}

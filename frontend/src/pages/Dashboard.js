@@ -3,7 +3,7 @@ import React from "react";
 const Dashboard = ({ url, setUrl, handleShorten, shortId, API_BASE_URL, history, loading, error }) => {
   return (
     <div className="container">
-      <h1>MiniURL</h1>
+      <h1>Slink</h1>
       <p className="subtitle">Powerful link shortener with detailed analytics</p>
 
       <form onSubmit={handleShorten} className="input-group">

@@ -26,21 +26,14 @@ export async function generateNewShortUrl(req, res) {
 
     const userUrls = await Url.find({ owner: req.user.id }).sort({ createdAt: -1 });
 
-    if (req.headers.accept?.includes("application/json")) {
-      return res.status(201).json({
-        id: shortId,
-        urls: userUrls,
-      });
-    }
-
-    return res.render("Home", {
+    return res.status(201).json({
       id: shortId,
       urls: userUrls,
     });
 
   } catch (err) {
     console.error("Error generating short URL:", err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 }
 
@@ -60,34 +53,27 @@ export async function handleGetAnalytics(req, res) {
     });
   } catch (err) {
     console.error("Analytics Error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 }
 
-export async function renderHome(req, res) {
+// Get all URLs for current user
+export async function handleGetAllUrls(req, res) {
   try {
     const allUrls = await Url.find({ owner: req.user.id }).sort({ createdAt: -1 });
-
-    if (req.headers.accept?.includes("application/json")) {
-      return res.json({ urls: allUrls });
-    }
-
-    res.render("Home", { urls: allUrls, id: null });
+    return res.json({ urls: allUrls });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server Error");
+    console.error("Fetch History Error:", err);
+    res.status(500).json({ error: "Server Error" });
   }
 }
-
 
 // Redirect short URL to actual URL
 export async function handleRedirect(req, res) {
   try {
     const shortId = req.params.shortId;
-    console.log("Redirect request for:", shortId);
 
     const entry = await Url.findOne({ shortId });
-    console.log("DB entry found:", entry);
 
     if (!entry) {
       return res.status(404).json({ error: "Short URL not found" });
@@ -100,7 +86,6 @@ export async function handleRedirect(req, res) {
     return res.redirect(entry.redirectUrl);
   } catch (err) {
     console.error("Redirect Error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 }
-
