@@ -1,13 +1,13 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
-import { generateNewShortUrl, handleGetAnalytics, handleRedirect, renderHome } from "../controllers/url.js";
+import { generateNewShortUrl, handleGetAnalytics, handleRedirect, handleGetAllUrls } from "../controllers/url.js";
 
 const router = express.Router();
 
 router.use(authMiddleware)
 
-// Home page
-router.get("/", renderHome);
+// Get all URLs for user
+router.get("/", handleGetAllUrls);
 
 // Generate new short URL
 router.post("/", generateNewShortUrl);

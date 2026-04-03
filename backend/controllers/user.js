@@ -9,18 +9,12 @@ export async function handleUserSignup(req, res) {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      if (req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ error: "All fields are required" });
-      }
-      return res.render("signup", { error: "All fields are required" });
+      return res.status(400).json({ error: "All fields are required" });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      if (req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
-      return res.render("signup", { error: "Email already exists" });
+      return res.status(400).json({ error: "Email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -34,19 +28,10 @@ export async function handleUserSignup(req, res) {
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.cookie("token", token, { httpOnly: true });
 
-    const userUrls = await Url.find({ owner: user._id });
-
-    if (req.headers.accept?.includes("application/json")) {
-      return res.status(201).json({ message: "Signup successful", urls: userUrls });
-    }
-
-    return res.render("Home", {
-      urls: userUrls,
-      id: null,
-    });
+    return res.status(201).json({ message: "Signup successful" });
   } catch (err) {
     console.error("Signup Error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 }
 
@@ -57,18 +42,12 @@ export async function handleUserLogin(req, res) {
     const user = await User.findOne({ email });
 
     if (!user) {
-      if (req.headers.accept?.includes("application/json")) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      return res.render("login", { error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      if (req.headers.accept?.includes("application/json")) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      return res.render("login", { error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -76,18 +55,9 @@ export async function handleUserLogin(req, res) {
 
     const userUrls = await Url.find({ owner: user._id });
 
-    if (req.headers.accept?.includes("application/json")) {
-      return res.json({ message: "Login successful", urls: userUrls });
-    }
-
-    return res.render("Home", {
-      urls: userUrls,
-      id: null,
-    }); // Login success
+    return res.json({ message: "Login successful", urls: userUrls });
   } catch (err) {
     console.error("Login Error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 }
-
-
