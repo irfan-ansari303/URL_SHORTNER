@@ -7,7 +7,10 @@ import Dashboard from "./pages/Dashboard.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import Navbar from "./components/Navbar.jsx";
 
-const API_BASE_URL = "";
+// Short links are resolved by the Express server, not the Vite dev server.
+const SHORT_LINK_BASE = import.meta.env.DEV
+  ? "http://localhost:8000"
+  : window.location.origin;
 
 function App() {
   const [url, setUrl] = useState("");
@@ -15,6 +18,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState("");
 
   const [authForm, setAuthForm] = useState({ email: "", password: "", name: "" });
@@ -23,7 +27,7 @@ function App() {
 
   useEffect(() => {
     fetchHistory();
-  }, [isLogged]);
+  }, []);
 
   const fetchHistory = async () => {
     try {
@@ -31,9 +35,10 @@ function App() {
       setHistory(response.data.urls);
       setIsLogged(true);
     } catch (err) {
-      if (err.response?.status === 401) {
-        setIsLogged(false);
-      }
+      setIsLogged(false);
+      setHistory([]);
+    } finally {
+      setCheckingSession(false);
     }
   };
 
@@ -62,11 +67,14 @@ function App() {
     try {
       if (isSignup) {
         await authService.signup(authForm);
+        await fetchHistory();
       } else {
-        await authService.login(authForm);
+        const response = await authService.login(authForm);
+        setHistory(response.data.urls || []);
+        setIsLogged(true);
       }
-      setIsLogged(true);
       setAuthForm({ email: "", password: "", name: "" });
+      setShowAuth(false);
     } catch (err) {
       setError(err.response?.data?.error || "Auth failed. Check your credentials.");
     } finally {
@@ -74,9 +82,15 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
-    // Clear cookies/token logic if any (optional based on your backend auth)
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      // Still clear local state even if the request fails
+    }
     setIsLogged(false);
+    setHistory([]);
+    setShortId("");
     setShowAuth(false);
   };
 
@@ -91,6 +105,17 @@ function App() {
     setShowAuth(true);
     setError("");
   };
+
+  if (checkingSession) {
+    return (
+      <div className="App">
+        <Navbar isLogged={false} onLogin={openLogin} onSignup={openSignup} onLogout={handleLogout} />
+        <main className="landing-container">
+          <p className="subtitle">Loading...</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
@@ -121,7 +146,7 @@ function App() {
           setUrl={setUrl}
           handleShorten={handleShorten}
           shortId={shortId}
-          API_BASE_URL={API_BASE_URL}
+          API_BASE_URL={SHORT_LINK_BASE}
           history={history}
           loading={loading}
           error={error}

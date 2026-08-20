@@ -3,8 +3,8 @@ import React from "react";
 const AuthPage = ({ isSignup, setIsSignup, authForm, setAuthForm, handleAuth, loading, error }) => {
   return (
     <main className="auth-page">
-      <section className="auth-hero" aria-label="MiniURL authentication">
-        <div className="auth-badge">MiniURL Access</div>
+      <section className="auth-hero" aria-label="Slink authentication">
+        <div className="auth-badge">Slink Access</div>
         <h1>{isSignup ? "Create your workspace" : "Welcome back"}</h1>
         <p>
           {isSignup
@@ -18,7 +18,7 @@ const AuthPage = ({ isSignup, setIsSignup, authForm, setAuthForm, handleAuth, lo
             <span></span>
             <span></span>
           </div>
-          <div className="preview-link">mini.url/summer-drop</div>
+          <div className="preview-link">slink.io/summer-drop</div>
           <div className="preview-stats">
             <div>
               <strong>12.8k</strong>
