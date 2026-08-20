@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000"; // Directed to Backend Port in Dev
+// Empty base URL uses same origin (production) or Vite proxy (dev).
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -29,7 +29,7 @@ const Dashboard = ({ url, setUrl, handleShorten, shortId, API_BASE_URL, history,
           <div className="shortener-controls">
             <input
               id="long-url"
-              type="url"
+              type="text"
               placeholder="https://example.com/very-long-link"
               value={url}
               onChange={(e) => setUrl(e.target.value)}

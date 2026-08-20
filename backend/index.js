@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import cors from "cors";
 
@@ -10,50 +11,63 @@ import urlRoutes from "./routes/url.js";
 import userRoutes from "./routes/user.js";
 import Url from "./models/url.js";
 
-dotenv.config();
-
-// Fix __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+if (!process.env.MONGO_URL) {
+  console.error("❌ Missing MONGO_URL in backend/.env");
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error("❌ Missing JWT_SECRET in backend/.env");
+  process.exit(1);
+}
+
 const app = express();
 
-app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:3001",
+    ],
+    credentials: true,
+  }),
+);
 
-
-
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Serve static files from Vite build
 const buildPath = path.join(__dirname, "../frontend/dist");
-app.use(express.static(buildPath));
+const hasFrontendBuild = fs.existsSync(path.join(buildPath, "index.html"));
 
-// Routes
+if (hasFrontendBuild) {
+  app.use(express.static(buildPath));
+}
+
 app.use("/user", userRoutes);
 app.use("/url", urlRoutes);
 
-// Route to handle short URLs (Dynamic)
 app.get("/:shortId", async (req, res, next) => {
-  // Ignore routes starting with user or url to prevent overlaps
-  if (req.params.shortId === 'user' || req.params.shortId === 'url' || req.params.shortId === 'static') {
+  const reserved = new Set(["user", "url", "static", "api"]);
+  if (reserved.has(req.params.shortId)) {
     return next();
   }
-  
+
   try {
     const shortId = req.params.shortId;
     const entry = await Url.findOneAndUpdate(
       { shortId },
-      { $push: { visitHistory: { timestamp: Date.now() } } }
+      { $push: { visitHistory: { timestamp: Date.now() } } },
     );
 
     if (!entry) {
-      return next(); // Pass to catch-all (which serves React app)
+      return next();
     }
 
     return res.redirect(entry.redirectUrl);
@@ -63,12 +77,15 @@ app.get("/:shortId", async (req, res, next) => {
   }
 });
 
-// Catch-all route to serve React app for frontend routing (must be LAST)
 app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(buildPath, "index.html"));
+  if (hasFrontendBuild) {
+    return res.sendFile(path.join(buildPath, "index.html"));
+  }
+  return res.status(404).json({
+    error: "Frontend build not found. Run npm run build from the project root, or use Vite in development.",
+  });
 });
 
-// Connect to MongoDB and start server
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
@@ -80,6 +97,6 @@ mongoose
     });
   })
   .catch((err) => {
-    console.error("❌ Error connecting to MongoDB:", err);
+    console.error("❌ Error connecting to MongoDB:", err.message);
+    process.exit(1);
   });
-

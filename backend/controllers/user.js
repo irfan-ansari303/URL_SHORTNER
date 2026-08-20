@@ -3,6 +3,22 @@ import Url from "../models/url.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  maxAge: 60 * 60 * 1000,
+};
+
+function createToken(user) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not set");
+  }
+  return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+}
+
 // Handle user signup
 export async function handleUserSignup(req, res) {
   try {
@@ -25,8 +41,8 @@ export async function handleUserSignup(req, res) {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.cookie("token", token, { httpOnly: true });
+    const token = createToken(user);
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     return res.status(201).json({ message: "Signup successful" });
   } catch (err) {
@@ -50,14 +66,24 @@ export async function handleUserLogin(req, res) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.cookie("token", token, { httpOnly: true });
+    const token = createToken(user);
+    res.cookie("token", token, COOKIE_OPTIONS);
 
-    const userUrls = await Url.find({ owner: user._id });
+    const userUrls = await Url.find({ owner: user._id }).sort({ createdAt: -1 });
 
     return res.json({ message: "Login successful", urls: userUrls });
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ error: "Server Error" });
   }
+}
+
+// Handle user logout
+export async function handleUserLogout(req, res) {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+  return res.json({ message: "Logout successful" });
 }
